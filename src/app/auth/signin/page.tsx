@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import SignInForm from "./sign-in-form";
+import { Suspense } from "react";
 
 export default function SignIn() {
   return (
@@ -12,7 +13,9 @@ export default function SignIn() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <SignInForm />
+          <Suspense fallback={<div>Loading...</div>}>
+            <SignInForm />
+          </Suspense>
         </CardContent>
       </Card>
     </div>
