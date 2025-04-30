@@ -13,7 +13,7 @@ export default async function Home() {
   // Display user email if authenticated
   return (
     <div className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h1 className="text-4xl font-bold mb-8">Welcome to TechCMS</h1>
+      <h1 className="text-4xl font-bold mb-8">Welcome to SaaS - Simple as a Service</h1>
       <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-md">
         <h2 className="text-xl font-semibold mb-4">Your Profile</h2>
         <p className="text-gray-700">
