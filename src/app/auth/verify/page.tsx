@@ -4,17 +4,18 @@ export default function VerifyRequest() {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <Card className="w-[350px]">
-        <CardHeader>
-          <CardTitle>Check your email</CardTitle>
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl">Check your email</CardTitle>
           <CardDescription>
-            A verification code has been sent to your email address.
-            Please check your inbox and enter the code to continue.
+            We sent you a verification link
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
-            If you don&apos;t see the email, check your spam folder.
-          </p>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Please check your inbox and click the link to continue. If you don&apos;t see the email, check your spam folder.
+            </p>
+          </div>
         </CardContent>
       </Card>
     </div>
