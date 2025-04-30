@@ -1,39 +1,32 @@
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { db } from "@/lib/db";
 import { users, userRole, UserRole } from "@/lib/schema";
 import { eq } from "drizzle-orm";
-import { Adapter, AdapterUser } from "next-auth/adapters";
+import type { Adapter, AdapterUser } from "@auth/core/adapters";
 import crypto from "crypto";
 
 const ADMIN_EMAIL = "benjaminjcullen1@gmail.com";
 
 interface CustomAdapterUser extends AdapterUser {
   role: UserRole;
+  firstName?: string | null;
+  lastName?: string | null;
 }
 
-interface CreateUserData {
-  email: string;
-  [key: string]: unknown;
-}
-
-const baseAdapter = DrizzleAdapter(db) as Adapter;
-
-export const customAdapter: Adapter = {
-  ...baseAdapter,
-  createUser: async (data: CreateUserData) => {
-    const role = data.email === ADMIN_EMAIL ? userRole.ADMIN : userRole.USER;
+export const customAdapter = {
+  createUser: async (user: AdapterUser) => {
+    const role = user.email === ADMIN_EMAIL ? userRole.ADMIN : userRole.USER;
     const id = crypto.randomUUID();
     await db.insert(users).values({
-      ...data,
+      ...user,
       id,
       role,
     });
     
-    const user = await db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.email, data.email),
+    const createdUser = await db.query.users.findFirst({
+      where: (users, { eq }) => eq(users.email, user.email),
     });
     
-    return user as CustomAdapterUser;
+    return createdUser as CustomAdapterUser;
   },
   getUserByEmail: async (email: string) => {
     const result = await db.query.users.findFirst({
@@ -44,7 +37,6 @@ export const customAdapter: Adapter = {
     
     return {
       ...result,
-      // Ensure these fields are always present in the session
       firstName: result.firstName || null,
       lastName: result.lastName || null,
       name: result.firstName && result.lastName 
@@ -53,11 +45,16 @@ export const customAdapter: Adapter = {
     } as CustomAdapterUser;
   },
   
-  // Override the update user method to handle name fields
-  updateUser: async (user: Partial<CustomAdapterUser> & { id: string }) => {
-    const name = user.firstName && user.lastName 
-      ? `${user.firstName} ${user.lastName}`
-      : user.firstName || user.lastName || null;
+  updateUser: async (user: Partial<AdapterUser> & { id: string }) => {
+    const existingUser = await db.query.users.findFirst({
+      where: (users, { eq }) => eq(users.id, user.id),
+    });
+
+    if (!existingUser) throw new Error("User not found");
+
+    const name = existingUser.firstName && existingUser.lastName 
+      ? `${existingUser.firstName} ${existingUser.lastName}`
+      : existingUser.firstName || existingUser.lastName || null;
 
     await db
       .update(users)
