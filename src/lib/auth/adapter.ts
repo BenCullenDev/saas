@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { db } from "@/lib/db";
 import { users, userRole, UserRole, verificationTokens } from "@/lib/schema";
 import { eq, and } from "drizzle-orm";
@@ -52,7 +53,7 @@ export const customAdapter = {
         : result.firstName || result.lastName || null,
     } as CustomAdapterUser;
   },
-  getUserByAccount: async ({ providerAccountId, provider }: { providerAccountId: string; provider: string; }) => {
+  getUserByAccount: async ({ providerAccountId: _providerAccountId, provider: _provider }: { providerAccountId: string; provider: string; }) => {
     return null;
   },
   updateUser: async (user: Partial<AdapterUser> & { id: string }) => {
@@ -83,22 +84,22 @@ export const customAdapter = {
   deleteUser: async (userId: string) => {
     await db.delete(users).where(eq(users.id, userId));
   },
-  linkAccount: async (account: AdapterAccount) => {
-    return account;
+  linkAccount: async (_account: AdapterAccount) => {
+    return _account;
   },
-  unlinkAccount: async (account: Pick<AdapterAccount, "provider" | "providerAccountId">) => {
+  unlinkAccount: async (_account: Pick<AdapterAccount, "provider" | "providerAccountId">) => {
     return;
   },
   createSession: async (session: AdapterSession) => {
     return session;
   },
-  getSessionAndUser: async (sessionToken: string) => {
+  getSessionAndUser: async (_sessionToken: string) => {
     return null;
   },
-  updateSession: async (session: Partial<AdapterSession> & Pick<AdapterSession, "sessionToken">) => {
+  updateSession: async (_session: Partial<AdapterSession> & Pick<AdapterSession, "sessionToken">) => {
     return null;
   },
-  deleteSession: async (sessionToken: string) => {
+  deleteSession: async (_sessionToken: string) => {
     return;
   },
   createVerificationToken: async (token: VerificationToken) => {
