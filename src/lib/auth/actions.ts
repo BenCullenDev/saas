@@ -1,7 +1,6 @@
 "use server";
 
 import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { users } from "@/lib/schema";
 import { eq } from "drizzle-orm";

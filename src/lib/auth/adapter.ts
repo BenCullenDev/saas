@@ -1,19 +1,31 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import { db } from "@/lib/db";
-import { users, userRole } from "@/lib/schema";
+import { users, userRole, UserRole } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { Adapter, AdapterUser } from "next-auth/adapters";
+import crypto from "crypto";
 
 const ADMIN_EMAIL = "benjaminjcullen1@gmail.com";
+
+interface CustomAdapterUser extends AdapterUser {
+  role: UserRole;
+}
+
+interface CreateUserData {
+  email: string;
+  [key: string]: unknown;
+}
 
 const baseAdapter = DrizzleAdapter(db) as Adapter;
 
 export const customAdapter: Adapter = {
   ...baseAdapter,
-  createUser: async (data) => {
+  createUser: async (data: CreateUserData) => {
     const role = data.email === ADMIN_EMAIL ? userRole.ADMIN : userRole.USER;
-    const result = await db.insert(users).values({
+    const id = crypto.randomUUID();
+    await db.insert(users).values({
       ...data,
+      id,
       role,
     });
     
@@ -21,7 +33,7 @@ export const customAdapter: Adapter = {
       where: (users, { eq }) => eq(users.email, data.email),
     });
     
-    return user as AdapterUser;
+    return user as CustomAdapterUser;
   },
   getUserByEmail: async (email: string) => {
     const result = await db.query.users.findFirst({
@@ -38,11 +50,11 @@ export const customAdapter: Adapter = {
       name: result.firstName && result.lastName 
         ? `${result.firstName} ${result.lastName}`
         : result.firstName || result.lastName || null,
-    };
+    } as CustomAdapterUser;
   },
   
   // Override the update user method to handle name fields
-  updateUser: async (user: Partial<AdapterUser> & { id: string }) => {
+  updateUser: async (user: Partial<CustomAdapterUser> & { id: string }) => {
     const name = user.firstName && user.lastName 
       ? `${user.firstName} ${user.lastName}`
       : user.firstName || user.lastName || null;
@@ -59,6 +71,6 @@ export const customAdapter: Adapter = {
     const updated = await db.query.users.findFirst({
       where: (users, { eq }) => eq(users.id, user.id),
     });
-    return updated as AdapterUser;
+    return updated as CustomAdapterUser;
   },
 } satisfies Adapter; 
