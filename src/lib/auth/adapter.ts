@@ -1,7 +1,7 @@
 import { db } from "@/lib/db";
-import { users, userRole, UserRole } from "@/lib/schema";
-import { eq } from "drizzle-orm";
-import type { Adapter, AdapterUser } from "@auth/core/adapters";
+import { users, userRole, UserRole, verificationTokens } from "@/lib/schema";
+import { eq, and } from "drizzle-orm";
+import type { Adapter, AdapterUser, AdapterAccount, AdapterSession, VerificationToken } from "@auth/core/adapters";
 import crypto from "crypto";
 
 const ADMIN_EMAIL = "benjaminjcullen1@gmail.com";
@@ -28,6 +28,14 @@ export const customAdapter = {
     
     return createdUser as CustomAdapterUser;
   },
+  getUser: async (id: string) => {
+    const user = await db.query.users.findFirst({
+      where: (users, { eq }) => eq(users.id, id),
+    });
+    
+    if (!user) return null;
+    return user as CustomAdapterUser;
+  },
   getUserByEmail: async (email: string) => {
     const result = await db.query.users.findFirst({
       where: (users, { eq }) => eq(users.email, email),
@@ -44,7 +52,9 @@ export const customAdapter = {
         : result.firstName || result.lastName || null,
     } as CustomAdapterUser;
   },
-  
+  getUserByAccount: async ({ providerAccountId, provider }: { providerAccountId: string; provider: string; }) => {
+    return null;
+  },
   updateUser: async (user: Partial<AdapterUser> & { id: string }) => {
     const existingUser = await db.query.users.findFirst({
       where: (users, { eq }) => eq(users.id, user.id),
@@ -70,4 +80,44 @@ export const customAdapter = {
     });
     return updated as CustomAdapterUser;
   },
+  deleteUser: async (userId: string) => {
+    await db.delete(users).where(eq(users.id, userId));
+  },
+  linkAccount: async (account: AdapterAccount) => {
+    return account;
+  },
+  unlinkAccount: async (account: Pick<AdapterAccount, "provider" | "providerAccountId">) => {
+    return;
+  },
+  createSession: async (session: AdapterSession) => {
+    return session;
+  },
+  getSessionAndUser: async (sessionToken: string) => {
+    return null;
+  },
+  updateSession: async (session: Partial<AdapterSession> & Pick<AdapterSession, "sessionToken">) => {
+    return null;
+  },
+  deleteSession: async (sessionToken: string) => {
+    return;
+  },
+  createVerificationToken: async (token: VerificationToken) => {
+    await db.insert(verificationTokens).values(token);
+    return token;
+  },
+  useVerificationToken: async ({ identifier, token }: { identifier: string; token: string }) => {
+    const verificationToken = await db.query.verificationTokens.findFirst({
+      where: (vt, { eq, and }) => and(eq(vt.identifier, identifier), eq(vt.token, token)),
+    });
+
+    if (!verificationToken) return null;
+
+    await db.delete(verificationTokens)
+      .where(and(
+        eq(verificationTokens.identifier, identifier),
+        eq(verificationTokens.token, token)
+      ));
+
+    return verificationToken;
+  }
 } satisfies Adapter; 

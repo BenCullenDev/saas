@@ -1,10 +1,9 @@
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { db } from "@/lib/db";
 import { NextAuthOptions } from "next-auth";
 import EmailProvider from "next-auth/providers/email";
+import { customAdapter } from "@/lib/auth/adapter";
 
 export const authOptions: NextAuthOptions = {
-  adapter: DrizzleAdapter(db),
+  adapter: customAdapter,
   session: {
     strategy: "jwt",
   },
