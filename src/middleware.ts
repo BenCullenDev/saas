@@ -5,6 +5,12 @@ export default withAuth({
     signIn: "/auth/signin",
     verifyRequest: "/auth/verify",
   },
+  callbacks: {
+    authorized: ({ token }) => {
+      if (token) return true;
+      return false;
+    },
+  },
 });
 
 export const config = {
