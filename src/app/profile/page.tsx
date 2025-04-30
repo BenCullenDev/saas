@@ -13,10 +13,10 @@ import { redirect } from "next/navigation";
 import { UserRole } from "@/lib/schema";
 
 export default function ProfilePage() {
-  const { status } = useSession({
+  const { data: session, status } = useSession({
     required: true,
     onUnauthenticated() {
-      redirect('/auth/signin');
+      return;
     },
   });
 

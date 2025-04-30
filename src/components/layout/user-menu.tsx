@@ -11,7 +11,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useSession } from "next-auth/react";
-import Link from "next/link";
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
@@ -25,6 +24,10 @@ export default function UserMenu() {
       callbackUrl: "/auth/signin"
     });
     router.push("/auth/signin");
+  };
+
+  const handleProfileClick = () => {
+    router.push("/profile");
   };
 
   const displayName = session?.user?.firstName && session?.user?.lastName
@@ -50,10 +53,8 @@ export default function UserMenu() {
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href="/profile" className="cursor-pointer">
-            Profile
-          </Link>
+        <DropdownMenuItem onClick={handleProfileClick} className="cursor-pointer">
+          Profile
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem 
