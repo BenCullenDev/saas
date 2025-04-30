@@ -9,11 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
 import { updateUser } from "@/lib/auth/actions";
 import { toast } from "sonner";
-import { redirect } from "next/navigation";
 import { UserRole } from "@/lib/schema";
 
 export default function ProfilePage() {
-  const { data: session, status } = useSession({
+  const { status } = useSession({
     required: true,
     onUnauthenticated() {
       return;
