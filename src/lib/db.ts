@@ -12,15 +12,6 @@ const poolConnection = mysql.createPool({
   connectTimeout: 30000, // 30 seconds
 });
 
-// Add connection error handling
-poolConnection.on('error', (err) => {
-  console.error('Database pool error:', err);
-});
-
-poolConnection.on('connection', () => {
-  console.log('New connection made to the database');
-});
-
 // Test the connection
 async function testConnection() {
   try {
