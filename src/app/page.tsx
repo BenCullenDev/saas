@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
 import { authOptions } from "./api/auth/[...nextauth]/options";
-import SignOutButton from "@/components/auth/sign-out-button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function Home() {
   const session = await getServerSession(authOptions);
@@ -11,24 +11,33 @@ export default async function Home() {
     redirect("/auth/signin");
   }
   
-  // Display user email if authenticated
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h1 className="text-4xl font-bold mb-8">Welcome to SaaS - Simple affordable adaptable Software.</h1>
-      <div className="bg-white shadow-md rounded-lg p-6 w-full max-w-md">
-        <h2 className="text-xl font-semibold mb-4">Your Profile</h2>
-        <p className="text-gray-700">
-          <span className="font-medium">Email:</span> {session.user?.email}
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <p className="text-muted-foreground">
+          Welcome back, {session.user?.name || session.user?.email}
         </p>
-        {session.user?.name && (
-          <p className="text-gray-700 mt-2">
-            <span className="font-medium">Name:</span> {session.user.name}
-          </p>
-        )}
-        <div className="mt-6">
-          <SignOutButton />
-        </div>
       </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Your Profile</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div>
+              <p className="text-sm font-medium">Email</p>
+              <p className="text-sm text-muted-foreground">{session.user?.email}</p>
+            </div>
+            {session.user?.name && (
+              <div>
+                <p className="text-sm font-medium">Name</p>
+                <p className="text-sm text-muted-foreground">{session.user.name}</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
