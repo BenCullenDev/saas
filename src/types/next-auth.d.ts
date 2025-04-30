@@ -1,4 +1,5 @@
 import NextAuth from "next-auth";
+import { UserRole } from "@/lib/schema";
 
 declare module "next-auth" {
   interface User {
@@ -8,6 +9,7 @@ declare module "next-auth" {
     lastName?: string | null;
     emailVerified?: Date | null;
     image?: string | null;
+    role: UserRole;
   }
 
   interface Session {

@@ -1,5 +1,12 @@
 import { mysqlTable, varchar, timestamp, text, int } from "drizzle-orm/mysql-core";
 
+export const userRole = {
+  ADMIN: 'admin',
+  USER: 'user',
+} as const;
+
+export type UserRole = typeof userRole[keyof typeof userRole];
+
 export const users = mysqlTable("user", {
   id: varchar("id", { length: 255 }).primaryKey(),
   name: varchar("name", { length: 255 }),
@@ -8,6 +15,7 @@ export const users = mysqlTable("user", {
   email: varchar("email", { length: 255 }).notNull().unique(),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: varchar("image", { length: 255 }),
+  role: varchar("role", { length: 10 }).notNull().default(userRole.USER),
 });
 
 export const accounts = mysqlTable("account", {

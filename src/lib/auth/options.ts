@@ -25,6 +25,7 @@ export const authOptions: NextAuthOptions = {
       if (user) {
         token.firstName = user.firstName;
         token.lastName = user.lastName;
+        token.role = user.role;
       }
       // Handle updates from client
       if (trigger === "update" && session) {
@@ -40,6 +41,7 @@ export const authOptions: NextAuthOptions = {
         session.user.firstName = token.firstName as string | undefined;
         session.user.lastName = token.lastName as string | undefined;
         session.user.name = token.name as string | undefined;
+        session.user.role = token.role as string;
       }
       return session;
     },

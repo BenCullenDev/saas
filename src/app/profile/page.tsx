@@ -5,10 +5,12 @@ import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { useState, useEffect } from "react";
 import { updateUser } from "@/lib/auth/actions";
 import { toast } from "sonner";
 import { redirect } from "next/navigation";
+import { UserRole } from "@/lib/schema";
 
 export default function ProfilePage() {
   const { status } = useSession({
@@ -21,6 +23,7 @@ export default function ProfilePage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [role, setRole] = useState<UserRole>("user");
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -32,6 +35,7 @@ export default function ProfilePage() {
       setFirstName(data.firstName || "");
       setLastName(data.lastName || "");
       setEmail(data.email || "");
+      setRole(data.role);
     } catch (error) {
       console.error('Error fetching profile:', error);
       toast.error("Failed to load profile");
@@ -73,8 +77,15 @@ export default function ProfilePage() {
     <div className="container mx-auto py-10">
       <Card>
         <CardHeader>
-          <CardTitle>Profile</CardTitle>
-          <CardDescription>Manage your account settings and preferences.</CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Profile</CardTitle>
+              <CardDescription>Manage your account settings and preferences.</CardDescription>
+            </div>
+            <Badge variant={role === "admin" ? "default" : "secondary"} className="text-sm">
+              {role.charAt(0).toUpperCase() + role.slice(1)}
+            </Badge>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
