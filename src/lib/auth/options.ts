@@ -1,11 +1,15 @@
 import { NextAuthOptions } from "next-auth";
 import EmailProvider from "next-auth/providers/email";
-import { customAdapter } from "./adapter";
+import { customAdapter } from "@/lib/auth/adapter";
+import { UserRole } from "@/lib/schema";
 
 export const authOptions: NextAuthOptions = {
   adapter: customAdapter,
   session: {
     strategy: "jwt",
+  },
+  pages: {
+    verifyRequest: "/auth/verify",
   },
   providers: [
     EmailProvider({
@@ -21,27 +25,16 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    jwt: async ({ token, user, trigger, session }) => {
+    jwt: async ({ token, user }) => {
       if (user) {
-        token.firstName = user.firstName;
-        token.lastName = user.lastName;
         token.role = user.role;
-      }
-      // Handle updates from client
-      if (trigger === "update" && session) {
-        token.firstName = session.user.firstName;
-        token.lastName = session.user.lastName;
-        token.name = session.user.name;
       }
       return token;
     },
     session: ({ session, token }) => {
-      if (session.user && token.sub) {
+      if (token.sub && session.user) {
         session.user.id = token.sub;
-        session.user.firstName = token.firstName as string | undefined;
-        session.user.lastName = token.lastName as string | undefined;
-        session.user.name = token.name as string | undefined;
-        session.user.role = token.role as string;
+        session.user.role = token.role as UserRole;
       }
       return session;
     },
