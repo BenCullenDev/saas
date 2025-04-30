@@ -17,7 +17,9 @@ export const authOptions: NextAuthOptions = {
         sameSite: 'lax',
         path: '/',
         secure: process.env.NODE_ENV === 'production',
-        domain: process.env.NODE_ENV === 'production' ? process.env.NEXT_PUBLIC_DOMAIN : undefined
+        ...(process.env.NODE_ENV === 'production' && process.env.NEXT_PUBLIC_DOMAIN
+          ? { domain: process.env.NEXT_PUBLIC_DOMAIN.replace(/^https?:\/\//, '') }
+          : {})
       }
     }
   },
