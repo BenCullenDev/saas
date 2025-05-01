@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { updateRole } from "./actions";
 import { userRole, type UserRole } from "@/lib/schema";
+import { toast } from "sonner";
 
 export const columns: ColumnDef<typeof users.$inferSelect>[] = [
   {
@@ -29,7 +30,12 @@ export const columns: ColumnDef<typeof users.$inferSelect>[] = [
         <Select
           defaultValue={role}
           onValueChange={async (value: UserRole) => {
-            await updateRole(row.original.id, value);
+            try {
+              await updateRole(row.original.id, value);
+              toast.success(`Role updated to ${value}`);
+            } catch (error) {
+              toast.error("Failed to update role");
+            }
           }}
         >
           <SelectTrigger className="w-[180px]">
