@@ -3,6 +3,9 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { users } from "@/lib/schema";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { updateRole } from "./actions";
+import { userRole, type UserRole } from "@/lib/schema";
 
 export const columns: ColumnDef<typeof users.$inferSelect>[] = [
   {
@@ -23,9 +26,25 @@ export const columns: ColumnDef<typeof users.$inferSelect>[] = [
     cell: ({ row }) => {
       const role = row.getValue("role") as string;
       return (
-        <Badge variant={role === "admin" ? "default" : "secondary"}>
-          {role}
-        </Badge>
+        <Select
+          defaultValue={role}
+          onValueChange={async (value: UserRole) => {
+            await updateRole(row.original.id, value);
+          }}
+        >
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Select role" />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.values(userRole).map((role) => (
+              <SelectItem key={role} value={role}>
+                <Badge variant={role === userRole.ADMIN ? "default" : "secondary"}>
+                  {role}
+                </Badge>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       );
     },
   },
