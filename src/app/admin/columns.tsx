@@ -4,9 +4,12 @@ import { ColumnDef } from "@tanstack/react-table";
 import { users } from "@/lib/schema";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { updateRole } from "./actions";
+import { updateRole, deleteUser } from "./actions";
 import { userRole, type UserRole } from "@/lib/schema";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useRouter } from "next/navigation";
 
 export const columns: ColumnDef<typeof users.$inferSelect>[] = [
   {
@@ -60,6 +63,43 @@ export const columns: ColumnDef<typeof users.$inferSelect>[] = [
     cell: ({ row }) => {
       const verified = row.getValue("emailVerified");
       return verified ? "Yes" : "No";
+    },
+  },
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      const router = useRouter();
+      return (
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" size="sm">Delete</Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete the user {row.original.email}. This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={async () => {
+                  try {
+                    await deleteUser(row.original.id);
+                    toast.success("User deleted successfully");
+                    router.refresh();
+                  } catch (error) {
+                    toast.error("Failed to delete user");
+                  }
+                }}
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      );
     },
   },
 ]; 

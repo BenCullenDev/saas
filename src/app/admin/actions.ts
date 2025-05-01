@@ -20,4 +20,9 @@ export async function updateRole(userId: string, newRole: string) {
     .where(eq(users.id, userId));
 
   return { success: true };
+}
+
+export async function deleteUser(userId: string) {
+  await db.delete(users).where(eq(users.id, userId));
+  return { success: true };
 } 
