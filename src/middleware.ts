@@ -1,7 +1,8 @@
-import { NextResponse, NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function middleware(request: NextRequest) {
-  return NextResponse.next();
+export async function middleware() {
+  const response = NextResponse.next();
+  return response;
 }
 
 export const config = {

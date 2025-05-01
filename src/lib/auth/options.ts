@@ -1,7 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import EmailProvider from "next-auth/providers/email";
 import { customAdapter } from "@/lib/auth/adapter";
-import { userRole } from "@/lib/schema";
+import { type UserRole } from "@/lib/schema";
 import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { users } from "@/lib/schema";
@@ -60,7 +60,7 @@ export const authOptions: NextAuthOptions = {
         // Fetch the latest role from the database
         const [dbUser] = await db.select().from(users).where(eq(users.id, token.sub));
         if (dbUser) {
-          session.user.role = dbUser.role;
+          session.user.role = dbUser.role as UserRole;
           console.log("Session updated with role from DB:", session.user.role);
         } else {
           console.log("No user found in database for ID:", token.sub);
