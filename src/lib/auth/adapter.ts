@@ -23,44 +23,37 @@ export const customAdapter = {
       role,
     });
     
-    const createdUser = await db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.email, user.email),
-    });
-    
+    const [createdUser] = await db.select().from(users).where(eq(users.email, user.email));
+    console.log("Created user:", createdUser);
     return createdUser as CustomAdapterUser;
   },
   getUser: async (id: string) => {
-    const user = await db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.id, id),
-    });
-    
+    const [user] = await db.select().from(users).where(eq(users.id, id));
     if (!user) return null;
+    console.log("Get user:", user);
     return user as CustomAdapterUser;
   },
   getUserByEmail: async (email: string) => {
-    const result = await db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.email, email),
-    });
-    
+    const [result] = await db.select().from(users).where(eq(users.email, email));
     if (!result) return null;
     
-    return {
+    const user = {
       ...result,
       firstName: result.firstName || null,
       lastName: result.lastName || null,
       name: result.firstName && result.lastName 
         ? `${result.firstName} ${result.lastName}`
         : result.firstName || result.lastName || null,
-    } as CustomAdapterUser;
+      role: result.role || userRole.USER,
+    };
+    console.log("Get user by email:", user);
+    return user as CustomAdapterUser;
   },
   getUserByAccount: async ({ providerAccountId: _providerAccountId, provider: _provider }: { providerAccountId: string; provider: string; }) => {
     return null;
   },
   updateUser: async (user: Partial<AdapterUser> & { id: string }) => {
-    const existingUser = await db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.id, user.id),
-    });
-
+    const [existingUser] = await db.select().from(users).where(eq(users.id, user.id));
     if (!existingUser) throw new Error("User not found");
 
     const name = existingUser.firstName && existingUser.lastName 
@@ -73,12 +66,10 @@ export const customAdapter = {
         ...user,
         name,
       })
-      .where(eq(users.id, user.id))
-      .execute();
+      .where(eq(users.id, user.id));
 
-    const updated = await db.query.users.findFirst({
-      where: (users, { eq }) => eq(users.id, user.id),
-    });
+    const [updated] = await db.select().from(users).where(eq(users.id, user.id));
+    console.log("Updated user:", updated);
     return updated as CustomAdapterUser;
   },
   deleteUser: async (userId: string) => {
@@ -106,19 +97,15 @@ export const customAdapter = {
     await db.insert(verificationTokens).values(token);
     return token;
   },
-  useVerificationToken: async ({ identifier, token }: { identifier: string; token: string }) => {
-    const verificationToken = await db.query.verificationTokens.findFirst({
-      where: (vt, { eq, and }) => and(eq(vt.identifier, identifier), eq(vt.token, token)),
-    });
-
-    if (!verificationToken) return null;
-
-    await db.delete(verificationTokens)
-      .where(and(
+  useVerificationToken: async ({ identifier, token }: { identifier: string; token: string; }) => {
+    const [result] = await db.select().from(verificationTokens).where(
+      and(
         eq(verificationTokens.identifier, identifier),
         eq(verificationTokens.token, token)
-      ));
-
-    return verificationToken;
-  }
+      )
+    );
+    if (!result) return null;
+    await db.delete(verificationTokens).where(eq(verificationTokens.identifier, identifier));
+    return result;
+  },
 } satisfies Adapter; 

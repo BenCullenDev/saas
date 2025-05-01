@@ -1,7 +1,10 @@
 import { NextAuthOptions } from "next-auth";
 import EmailProvider from "next-auth/providers/email";
 import { customAdapter } from "@/lib/auth/adapter";
-import { UserRole } from "@/lib/schema";
+import { userRole } from "@/lib/schema";
+import { eq } from "drizzle-orm";
+import { db } from "@/lib/db";
+import { users } from "@/lib/schema";
 
 export const authOptions: NextAuthOptions = {
   adapter: customAdapter,
@@ -45,14 +48,23 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     jwt: async ({ token, user }) => {
       if (user) {
-        token.role = user.role;
+        token.id = user.id;
+        console.log("JWT token updated with user ID:", token.id);
       }
       return token;
     },
-    session: ({ session, token }) => {
+    session: async ({ session, token }) => {
       if (token.sub && session.user) {
         session.user.id = token.sub;
-        session.user.role = token.role as UserRole;
+        
+        // Fetch the latest role from the database
+        const [dbUser] = await db.select().from(users).where(eq(users.id, token.sub));
+        if (dbUser) {
+          session.user.role = dbUser.role;
+          console.log("Session updated with role from DB:", session.user.role);
+        } else {
+          console.log("No user found in database for ID:", token.sub);
+        }
       }
       return session;
     },

@@ -9,6 +9,8 @@ export default async function Home() {
   if (!session) {
     redirect("/auth/signin");
   }
+
+  console.log(session);
   
   return (
     <div className="space-y-6">
