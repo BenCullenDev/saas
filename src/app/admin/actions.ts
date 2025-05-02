@@ -1,16 +1,15 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { users } from "@/lib/schema";
+import { users, userRole, UserRole } from "@/lib/schema";
 import { eq } from "drizzle-orm";
-import { userRole } from "@/lib/schema";
 
 export async function getUsers() {
   return await db.select().from(users);
 }
 
-export async function updateRole(userId: string, newRole: string) {
-  if (!Object.values(userRole).includes(newRole as any)) {
+export async function updateRole(userId: string, newRole: UserRole) {
+  if (!Object.values(userRole).includes(newRole)) {
     throw new Error("Invalid role");
   }
 
